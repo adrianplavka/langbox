@@ -1,0 +1,20 @@
+﻿@using AntDesign
+
+<Sider Style="overflow: auto; height: 100vh; position: fixed; left: 0; background-color: #222222;">
+    <h3 style="display: flex; justify-content: center; margin-top: 10px; color: white;">
+        Langbox
+    </h3>
+
+    <Menu Style="background-color: #222222;" Theme="MenuTheme.Dark" Mode="MenuMode.Inline" DefaultSelectedKeys=@(new[]{"1"})>
+        <MenuItem Key="1">
+            <NavLink href="/" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Challenge
+            </NavLink>
+        </MenuItem>
+        <MenuItem Key="2">
+            <NavLink href="/challenge/new">
+                <span class="oi oi-plus" aria-hidden="true"></span> Add Challenge
+            </NavLink>
+        </MenuItem>
+    </Menu>
+</Sider>

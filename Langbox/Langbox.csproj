@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>34cbdc66-1a2d-43e8-8c3d-64ed0928b0a2</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AntDesign" Version="0.3.0" />
+    <PackageReference Include="Docker.DotNet" Version="3.125.4" />
+    <PackageReference Include="Markdig" Version="0.22.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.4" />
+    <PackageReference Include="Westwind.AspNetCore.LiveReload" Version="0.2.12" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Disables linker when not in release mode -->
+    <BlazorLinkOnBuild Condition="'$(Configuration)'!='Release'">false</BlazorLinkOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Extends watching group to include *.razor files -->
+    <Watch Include="**\*.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Pages\ChallengeNew.razor" />
+    <Watch Remove="Pages\ChallengeRandom.razor" />
+    <Watch Remove="Pages\ChallengeShow.razor" />
+    <Watch Remove="Shared\Components\Markdown.razor" />
+  </ItemGroup>
+
+</Project>

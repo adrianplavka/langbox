@@ -1,0 +1,105 @@
+﻿@using AntDesign
+
+@using Langbox.Shared.Components
+
+<h1>@currentChallenge.Title</h1>
+
+<Row Justify="between" Align="top" Style="margin-top: 10px;">
+    <Col Span="12">
+        <Tabs DefaultActiveKey="instructions" @bind-ActiveKey="@currentTab">
+            <TabPane Key="instructions">
+                <Tab>
+                    Instructions
+                </Tab>
+
+                <ChildContent>
+                    <Markdown Content="@currentChallenge.Instructions" />
+                </ChildContent>
+            </TabPane>
+
+            <TabPane Key="output">
+                <Tab>
+                    Output
+                </Tab>
+
+                <ChildContent>
+                    @if (isTesting)
+                    {
+                        <p style="text-align: center;">
+                            <Spin Indicator=iconLoadingPrimary /> Testing
+                        </p>
+                    }
+                    else
+                    {
+                        @if (lastExecutionResult is null)
+                        {
+                            <p>Your output will be displayed here.</p>
+                        }
+                        else if (lastExecutionResult.IsT0)
+                        {
+                            // Test succeeded.
+                            <h3 style="color: #4db94d;">Tests succeeded!</h3>
+                        }
+                        else if (lastExecutionResult.IsT1)
+                        {
+                            // Timeout.
+                            <h4>Timeout has occured.</h4>
+                        }
+                        else if (lastExecutionResult.IsT2)
+                        {
+                            // Build failed.
+                            <h3 style="color: firebrick;">Build failed!</h3>
+                            <br />
+                            <code>@lastExecutionResult.AsT2.Stdout</code>
+                        }
+                        else if (lastExecutionResult.IsT3)
+                        {
+                            // Test failed.
+                            <h3 style="color: firebrick;">Tests failed!</h3>
+                            <br />
+                            <code>@lastExecutionResult.AsT3.Stdout</code>
+                        }
+                        else if (lastExecutionResult.IsT4)
+                        {
+                            // Unknown failure.
+                            <h3 style="color: firebrick;">Unknown failure!</h3>
+                        }
+                    }
+                </ChildContent>
+            </TabPane>
+        </Tabs>
+    </Col>
+
+    <Col Span="12">
+        <span>
+            Language: <Text Code>@currentChallenge.Environment?.Language</Text>
+        </span>
+
+        <div id="main-editor" style="width: auto; height: 600px; margin-top: 10px; border: 1px solid grey; background-color: #1e1e1e" />
+
+        <div style="display: flex; justify-content: flex-end; padding: 10px 0px 10px 10px;">
+            <Button>Next Challenge</Button>
+
+            <Button Type="primary" OnClick="@OnTest">
+                @if (isTesting)
+                {
+                    <Spin Indicator=iconLoadingDefault />
+                }
+                else
+                {
+                    <span>Test</span>
+                }
+            </Button>
+
+            @if (isTesting)
+            {
+                <Button OnClick="@OnCancelTest">Cancel Testing</Button>
+            }
+        </div>
+    </Col>
+</Row>
+
+@code {
+    RenderFragment iconLoadingPrimary = @<Icon Type="loading" Theme="outline" Style="font-size: 12px" Spin />;
+    RenderFragment iconLoadingDefault = @<Icon Type="loading" Theme="outline" Style="font-size: 12px; color: white;" Spin />;
+}

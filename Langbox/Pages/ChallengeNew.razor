@@ -1,0 +1,91 @@
+﻿@using AntDesign
+@using Langbox.Shared.Components
+
+<h2>Add Challenge</h2>
+
+<Divider />
+
+<div style="display: flex; flex-direction: column;">
+    <div>
+        <label>
+            <b>Title:</b>
+        </label>
+
+        <Input
+               Placeholder="Challenge" 
+               @bind-Value="@challengeTitle" 
+               Size="@InputSize.Large" />
+    </div>
+
+    <div style="margin-top: 10px;">
+        <label>
+            <b>Instructions</b> (markdown supported):
+        </label>
+
+        <Row Justify="between" Align="top" Style="margin-top: 10px;">
+            <Col Span="12">
+                <TextArea Placeholder="Your instructions for this challenge"
+                          AutoSize="true"
+                          @bind-Value="@challengeInstructions" />
+            </Col>
+
+            <Col Span="12">
+                <div style="padding-left: 20px; padding-right: 20px;">
+                    <Markdown Content="@challengeInstructions" />
+                </div>
+            </Col>
+        </Row>
+    </div>
+
+    <div style="display: flex; flex-direction: column; margin-top: 10px;">
+        <label>
+            <b>Sandbox template:</b>
+        </label>
+
+        <Select Size="@AntSizeLDSType.Default"
+                DefaultValue="@currentSandboxEnvironment?.TemplateName"
+                OnChange=OnTemplateChange
+                Style="width: 200px">
+            @foreach (var sandboxEnvironment in sandboxEnvironments)
+            {
+                <SelectOption Value="@sandboxEnvironment.TemplateName" Title="@sandboxEnvironment.TemplateName">
+                    @sandboxEnvironment.TemplateName
+                </SelectOption>
+            }
+        </Select>
+    </div>
+</div>
+
+<Row Justify="between" Align="top" Style="margin-top: 10px;">
+    <Col Span="12">
+        <div class="alert alert-secondary mt-4" role="alert">
+            <span class="oi oi-pencil mr-2" aria-hidden="true"></span>
+            <strong>Main</strong>
+
+            <span class="text-nowrap">
+                boilerplate contents, that will be visible to the user.
+            </span>
+        </div>
+
+        <div id="main-editor" style="width: auto; height: 600px; border: 1px solid grey; background-color: #1e1e1e" />
+    </Col>
+
+    <Col Span="12">
+        <div class="alert alert-secondary mt-4" role="alert">
+            <span class="oi oi-pencil mr-2" aria-hidden="true" />
+            <strong>Test</strong>
+
+            <span class="text-nowrap">
+                contents, that will be tested against the main file.
+            </span>
+        </div>
+
+        <div id="test-editor" style="width: auto; height: 600px; border: 1px solid grey; background-color: #1e1e1e" />
+    </Col>
+</Row>
+
+<Divider />
+
+<Button Type="primary" Size="large" OnClick="OnSubmit">
+    Submit
+</Button>

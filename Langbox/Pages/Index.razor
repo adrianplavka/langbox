@@ -1,0 +1,22 @@
+﻿@page "/"
+@inject IJSRuntime JS
+
+<div>
+    <h1>Hello, world!</h1>
+
+    Welcome to your new app.
+
+    <div id="main-editor" style="width: 800px; height: 600px; border: 1px solid grey; background-color: #1e1e1e"></div>
+</div>
+
+@code {
+    private object? _monacoEditorModelURI = null;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _monacoEditorModelURI = await JS.InvokeAsync<object>("Monaco.initialize", "main-editor", "csharp");
+        }
+    }
+}
