@@ -45,5 +45,24 @@ namespace Langbox.Services
 
             return challenges[0];
         }
+
+        public async Task<Challenge?> GetRandomWithoutIdAsync(int id)
+        {
+            var challenges = await DbContext.Challenges
+                .FromSqlRaw(
+                    "SELECT * FROM \"Challenge\" " +
+                    $"WHERE \"Challenge\".\"Id\" != {id} " +
+                    "ORDER BY random() " +
+                    "LIMIT 1"
+                )
+                .ToListAsync();
+
+            if (challenges.Count == 0)
+            {
+                return null;
+            }
+
+            return challenges[0];
+        }
     }
 }

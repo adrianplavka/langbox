@@ -20,9 +20,8 @@ namespace Langbox.Pages
         
         private Challenge currentChallenge { get; set; } = new Challenge();
         private string currentTab = "instructions";
-        private ExecutionResult? lastExecutionResult;
-
         private bool isTesting = false;
+        private ExecutionResult? lastExecutionResult;
         private CancellationTokenSource sandboxExecutionCancellationSource = new CancellationTokenSource();
 
         protected override async Task OnInitializedAsync()
@@ -42,6 +41,20 @@ namespace Langbox.Pages
                     "main-editor",
                     currentChallenge.Environment.Language,
                     currentChallenge.MainContent);
+        }
+
+        private async Task OnNextChallenge()
+        {
+            var nextChallenge = await ChallengeService.GetRandomWithoutIdAsync(currentChallenge.Id);
+
+            if (nextChallenge is object && currentChallenge.Id != nextChallenge.Id)
+            {
+                OnCancelTest();
+
+                currentChallenge = nextChallenge;
+                NavigationManager.NavigateTo($"/challenge/{currentChallenge.Id}");
+                await MainEditor.SetValueAsync(currentChallenge.MainContent);
+            }
         }
 
         private async Task OnTest()

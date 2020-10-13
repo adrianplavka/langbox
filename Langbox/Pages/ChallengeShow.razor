@@ -78,7 +78,7 @@
         <div id="main-editor" style="width: auto; height: 600px; margin-top: 10px; border: 1px solid grey; background-color: #1e1e1e" />
 
         <div style="display: flex; justify-content: flex-end; padding: 10px 0px 10px 10px;">
-            <Button>Next Challenge</Button>
+            <Button OnClick="@OnNextChallenge">Next Challenge</Button>
 
             <Button Type="primary" OnClick="@OnTest">
                 @if (isTesting)
