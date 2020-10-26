@@ -11,7 +11,7 @@ namespace Langbox.Data
     {
         private readonly IJSRuntime JS;
 
-        public string? ModelUri { get; private set; } = null;
+        private string? _moduleUri;
 
         public MonacoEditor(IJSRuntime js)
         {
@@ -26,7 +26,7 @@ namespace Langbox.Data
          */
         public async Task InitializeAsync(string domId, string language)
         {
-            ModelUri = await JS.InvokeAsync<string>("Monaco.initialize", domId, language);
+            _moduleUri = await JS.InvokeAsync<string>("Monaco.initialize", domId, language);
         }
 
         /**
@@ -49,9 +49,9 @@ namespace Langbox.Data
          */
         public async Task<string> GetValueAsync()
         {
-            if (!(ModelUri is null))
+            if (!(_moduleUri is null))
             {
-                return await JS.InvokeAsync<string>("Monaco.getValueOfModel", ModelUri);
+                return await JS.InvokeAsync<string>("Monaco.getValueOfModel", _moduleUri);
             } else
             {
                 return "";
@@ -65,9 +65,9 @@ namespace Langbox.Data
          */
         public async Task SetValueAsync(string value)
         {
-            if (!(ModelUri is null))
+            if (!(_moduleUri is null))
             {
-                await JS.InvokeVoidAsync("Monaco.setValueOfModel", ModelUri, value);
+                await JS.InvokeVoidAsync("Monaco.setValueOfModel", _moduleUri, value);
             }
         }
 
@@ -78,9 +78,9 @@ namespace Langbox.Data
         */
         public async Task SetLanguageAsync(string language)
         {
-            if (!(ModelUri is null))
+            if (!(_moduleUri is null))
             {
-                await JS.InvokeVoidAsync("Monaco.setLangOfModel", ModelUri, language);
+                await JS.InvokeVoidAsync("Monaco.setLangOfModel", _moduleUri, language);
             }
         }
     }

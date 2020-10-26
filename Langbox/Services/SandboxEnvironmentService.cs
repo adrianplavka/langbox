@@ -8,21 +8,21 @@ namespace Langbox.Services
 {
     public class SandboxEnvironmentService
     {
-        private readonly LangboxDbContext DbContext;
+        private readonly LangboxDbContext _dbContext;
 
         public SandboxEnvironmentService(LangboxDbContext context)
         {
-            DbContext = context;
+            _dbContext = context;
         }
 
         public ICollection<SandboxEnvironment> ListAll()
         {
-            return DbContext.SandboxEnviornments.ToList();
+            return _dbContext.SandboxEnviornments.ToList();
         }
 
         public async Task<SandboxEnvironment?> GetByTemplateNameAsync(string templateName)
         {
-            return await DbContext.SandboxEnviornments.FindAsync(templateName);
+            return await _dbContext.SandboxEnviornments.FindAsync(templateName);
         }
     }
 }

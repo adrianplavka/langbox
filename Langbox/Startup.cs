@@ -16,7 +16,7 @@ namespace Langbox
 {
     public class Startup
     {
-        private IWebHostEnvironment Env;
+        private readonly IWebHostEnvironment Env;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
@@ -24,7 +24,7 @@ namespace Langbox
             Env = env;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -33,21 +33,16 @@ namespace Langbox
             services.AddAntDesign();
 
             if (Env.IsDevelopment())
-            {
                 services.AddLiveReload(config => {
                     config.LiveReloadEnabled = true;
                     config.ClientFileExtensions = ".css,.js,.htm,.html";
                     config.FolderToMonitor = "~/../";
                 });
-            }
 
             if (Env.IsDevelopment())
-            {
                 services.AddRazorPages().AddRazorRuntimeCompilation();
-            } else
-            {
+            else
                 services.AddRazorPages();
-            }
             
             services.AddServerSideBlazor();
 
@@ -148,7 +143,7 @@ namespace Langbox
             {
                 Title = "One & Two",
                 Instructions =
-@"Your task is to fullfill class method implementations, according to the return types.
+@"Your task is to fulfill class method implementations, according to the return types.
 
 Example:
 

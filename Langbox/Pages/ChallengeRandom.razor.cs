@@ -6,6 +6,7 @@ using Langbox.Services;
 namespace Langbox.Pages
 {
     [Route("/challenge")]
+    // ReSharper disable once ClassNeverInstantiated.Global
     public partial class ChallengeRandom
     {
         [Inject] private ChallengeService ChallengeService { get; set; } = default!;
@@ -15,7 +16,7 @@ namespace Langbox.Pages
         {
             var challenge = await ChallengeService.GetRandomAsync();
 
-            if (challenge is object)
+            if (challenge is { })
                 NavigationManager.NavigateTo($"/challenge/{challenge.Id}");
         }
     }

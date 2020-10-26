@@ -11,18 +11,15 @@ namespace Langbox.Shared.Components
         [Parameter]
         public string Content
         {
-            get 
-            { 
-                return _content; 
-            }
-            
-            set
-            {
+            get => _content;
+
+            set =>
                 _content = Markdig.Markdown.ToHtml(
                     markdown: value,
-                    pipeline: new MarkdownPipelineBuilder().UseAdvancedExtensions().Build()
+                    pipeline: new MarkdownPipelineBuilder()
+                        .UseAdvancedExtensions()
+                        .Build()
                 );
-            }
         }
     }
 }

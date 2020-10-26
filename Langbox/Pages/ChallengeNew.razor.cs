@@ -13,6 +13,7 @@ using Langbox.Services;
 namespace Langbox.Pages
 {
     [Route("/challenge/new")]
+    // ReSharper disable once ClassNeverInstantiated.Global
     public partial class ChallengeNew
     {
         [Inject] private MonacoEditor MainEditor { get; set; } = default!;
@@ -21,30 +22,31 @@ namespace Langbox.Pages
         [Inject] private MessageService AntdMessageService { get; set; } = default!;
         [Inject] private SandboxEnvironmentService SandboxEnvironmentService { get; set; } = default!;
         
-        private ICollection<SandboxEnvironment> sandboxEnvironments = new SandboxEnvironment[] { };
-        private SandboxEnvironment? currentSandboxEnvironment = null;
-        private string challengeTitle = "";
-        private string challengeInstructions = "";
+        private ICollection<SandboxEnvironment> SandboxEnvironments { get; set; } 
+            = new SandboxEnvironment[] { };
+        private SandboxEnvironment? CurrentSandboxEnvironment { get; set; } = null;
+        private string ChallengeTitle { get; set; } = "";
+        private string ChallengeInstructions { get; set; } = "";
 
         protected override void OnInitialized()
         {
-            sandboxEnvironments = SandboxEnvironmentService.ListAll();
-            currentSandboxEnvironment = sandboxEnvironments.ElementAtOrDefault(0);
+            SandboxEnvironments = SandboxEnvironmentService.ListAll();
+            CurrentSandboxEnvironment = SandboxEnvironments.ElementAtOrDefault(0);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender && currentSandboxEnvironment is object)
+            if (firstRender && CurrentSandboxEnvironment is { })
             {
                 await MainEditor.InitializeAsync(
                     "main-editor",
-                    currentSandboxEnvironment.Language,
-                    currentSandboxEnvironment.MainBoilerplate);
+                    CurrentSandboxEnvironment.Language,
+                    CurrentSandboxEnvironment.MainBoilerplate);
 
                 await TestEditor.InitializeAsync(
                     "test-editor",
-                    currentSandboxEnvironment.Language,
-                    currentSandboxEnvironment.TestBoilerplate);
+                    CurrentSandboxEnvironment.Language,
+                    CurrentSandboxEnvironment.TestBoilerplate);
             }
         }
 
@@ -52,32 +54,30 @@ namespace Langbox.Pages
             OneOf<string, IEnumerable<string>, LabeledValue, IEnumerable<LabeledValue>> value,
             OneOf<SelectOption, IEnumerable<SelectOption>> option)
         {
-            if (value.IsT0)
-            {
-                currentSandboxEnvironment = await SandboxEnvironmentService.GetByTemplateNameAsync(value.AsT0);
+            if (!value.IsT0) return;
+            
+            CurrentSandboxEnvironment = await SandboxEnvironmentService.GetByTemplateNameAsync(value.AsT0);
 
-                if (currentSandboxEnvironment is object)
-                {
-                    await MainEditor.SetLanguageAsync(currentSandboxEnvironment.Language);
-                    await TestEditor.SetLanguageAsync(currentSandboxEnvironment.Language);
+            if (CurrentSandboxEnvironment is null) return;
+            
+            await MainEditor.SetLanguageAsync(CurrentSandboxEnvironment.Language);
+            await TestEditor.SetLanguageAsync(CurrentSandboxEnvironment.Language);
 
-                    await MainEditor.SetValueAsync(currentSandboxEnvironment.MainBoilerplate);
-                    await TestEditor.SetValueAsync(currentSandboxEnvironment.TestBoilerplate);
-                }
-            }
+            await MainEditor.SetValueAsync(CurrentSandboxEnvironment.MainBoilerplate);
+            await TestEditor.SetValueAsync(CurrentSandboxEnvironment.TestBoilerplate);
         }
 
         private async Task OnSubmit()
         {
-            if (currentSandboxEnvironment is object)
+            if (CurrentSandboxEnvironment is { })
             {
                 var challenge = new Challenge
                 {
-                    Title = challengeTitle,
-                    Instructions = challengeInstructions,
+                    Title = ChallengeTitle,
+                    Instructions = ChallengeInstructions,
                     MainContent = await MainEditor.GetValueAsync(),
                     TestContent = await TestEditor.GetValueAsync(),
-                    SandboxEnvironmentId = currentSandboxEnvironment.TemplateName,
+                    SandboxEnvironmentId = CurrentSandboxEnvironment.TemplateName,
                 };
 
                 await ChallengeService.CreateAsync(challenge);
@@ -89,13 +89,13 @@ namespace Langbox.Pages
 
         private async Task ResetForm()
         {
-            challengeTitle = "";
-            challengeInstructions = "";
+            ChallengeTitle = "";
+            ChallengeInstructions = "";
 
-            if (currentSandboxEnvironment is object)
+            if (CurrentSandboxEnvironment is { })
             {
-                await MainEditor.SetValueAsync(currentSandboxEnvironment.MainBoilerplate);
-                await TestEditor.SetValueAsync(currentSandboxEnvironment.TestBoilerplate);
+                await MainEditor.SetValueAsync(CurrentSandboxEnvironment.MainBoilerplate);
+                await TestEditor.SetValueAsync(CurrentSandboxEnvironment.TestBoilerplate);
             }
         }
     }

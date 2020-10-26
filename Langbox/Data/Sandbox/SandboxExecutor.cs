@@ -13,26 +13,34 @@ using Langbox.Models;
 
 namespace Langbox.Data.Sandbox
 {
-    public class SandboxExecutor
+    public static class SandboxExecutor
     {
-        class Execution : IDisposable, IAsyncDisposable
+        private class Execution : IAsyncDisposable
         {
-            private Challenge Challenge { get; set; }
-            private string MainContent { get; set; }
-            private CancellationToken CancellationToken { get; set; }
-            private string SandboxDirectory { get; set; }
-            private string MainFilePath { get; set; }
-            private string TestFilePath { get; set; }
-            private string Id = Guid.NewGuid().ToString();
-            private DockerClient DockerClient = new DockerClientConfiguration().CreateClient();
-            private CreateContainerResponse? Container;
+            private Challenge Challenge { get; }
+
+            private string MainContent { get; }
+
+            private CancellationToken CancellationToken { get; }
+
+            private string SandboxDirectory { get; }
+
+            private string MainFilePath { get; }
+
+            private string TestFilePath { get; }
+
+            private readonly string _id = Guid.NewGuid().ToString();
+
+            private readonly DockerClient _dockerClient = new DockerClientConfiguration().CreateClient();
+
+            private CreateContainerResponse? _container;
 
             public Execution(Challenge challenge, string mainContent, CancellationToken cancellationToken)
             {
                 Challenge = challenge;
                 MainContent = mainContent;
                 CancellationToken = cancellationToken;
-                SandboxDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}/Sandbox/{Id}";
+                SandboxDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}/Sandbox/{_id}";
                 MainFilePath = $"{SandboxDirectory}/{Challenge.Environment.MainFileName}";
                 TestFilePath = $"{SandboxDirectory}/{Challenge.Environment.TestFileName}";
             }
@@ -54,7 +62,6 @@ namespace Langbox.Data.Sandbox
                 }
                 finally
                 {
-                    Dispose();
                     await DisposeAsync();
                 }
             }
@@ -65,12 +72,12 @@ namespace Langbox.Data.Sandbox
 
                 ThrowIfCancellationRequested();
 
-                using (var sw = File.CreateText(MainFilePath))
+                await using (var sw = File.CreateText(MainFilePath))
                     await sw.WriteLineAsync(new StringBuilder(MainContent), CancellationToken);
 
                 ThrowIfCancellationRequested();
 
-                using (var sw = File.CreateText(TestFilePath))
+                await using (var sw = File.CreateText(TestFilePath))
                     await sw.WriteLineAsync(new StringBuilder(Challenge.TestContent), CancellationToken);
 
                 ThrowIfCancellationRequested();
@@ -78,7 +85,7 @@ namespace Langbox.Data.Sandbox
 
             private async Task<string> RunInContainerAsync()
             {
-                Container = await DockerClient.Containers.CreateContainerAsync(new CreateContainerParameters
+                _container = await _dockerClient.Containers.CreateContainerAsync(new CreateContainerParameters
                 {
                     Image = Challenge.Environment.DockerImage,
                     Cmd = Challenge.Environment.DockerCommand.Split(" "),
@@ -95,10 +102,10 @@ namespace Langbox.Data.Sandbox
                     }
                 }, CancellationToken);
 
-                await DockerClient.Containers.StartContainerAsync(Container.ID, null, CancellationToken);
-                await DockerClient.Containers.WaitContainerAsync(Container.ID, CancellationToken);
+                await _dockerClient.Containers.StartContainerAsync(_container.ID, null, CancellationToken);
+                await _dockerClient.Containers.WaitContainerAsync(_container.ID, CancellationToken);
 
-                var stream = await DockerClient.Containers.GetContainerLogsAsync(Container.ID, true, new ContainerLogsParameters
+                var stream = await _dockerClient.Containers.GetContainerLogsAsync(_container.ID, true, new ContainerLogsParameters
                 {
                     ShowStdout = true
                 }, CancellationToken);
@@ -107,24 +114,18 @@ namespace Langbox.Data.Sandbox
                 return stdout;
             }
 
-            private ExecutionResult RetrieveExecutionResult(string value)
+            private static ExecutionResult RetrieveExecutionResult(string value)
             {
                 var rawJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(value);
-                var type = rawJson["Type"];
 
-                switch (type)
+                return rawJson["Type"] switch
                 {
-                    case "test-succeeded":
-                        return JsonConvert.DeserializeObject<ExecutionResult.TestSucceeded>(value);
-                    case "test-failed":
-                        return JsonConvert.DeserializeObject<ExecutionResult.TestFailed>(value);
-                    case "build-failed":
-                        return JsonConvert.DeserializeObject<ExecutionResult.BuildFailed>(value);
-                    case "timeout":
-                        return JsonConvert.DeserializeObject<ExecutionResult.Timeout>(value);
-                    default:
-                        return new ExecutionResult.UnknownFailure();
-                }
+                    "test-succeeded" => JsonConvert.DeserializeObject<ExecutionResult.TestSucceeded>(value),
+                    "test-failed" => JsonConvert.DeserializeObject<ExecutionResult.TestFailed>(value),
+                    "build-failed" => JsonConvert.DeserializeObject<ExecutionResult.BuildFailed>(value),
+                    "timeout" => JsonConvert.DeserializeObject<ExecutionResult.Timeout>(value),
+                    _ => new ExecutionResult.UnknownFailure()
+                };
             }
 
             private void ThrowIfCancellationRequested()
@@ -133,20 +134,17 @@ namespace Langbox.Data.Sandbox
                     throw new TaskCanceledException();
             }
 
-            public void Dispose()
-            {
-                Directory.Delete($"{AppDomain.CurrentDomain.BaseDirectory}/Sandbox/{Id}", true);
-                GC.SuppressFinalize(this);
-            }
-
             public async ValueTask DisposeAsync()
             {
-                if (Container is object)
-                    await DockerClient.Containers.RemoveContainerAsync(Container.ID, new ContainerRemoveParameters
+                if (_container is { })
+                    // ReSharper disable once MethodSupportsCancellation
+                    await _dockerClient.Containers.RemoveContainerAsync(_container.ID, new ContainerRemoveParameters
                     {
                         Force = true,
                         RemoveVolumes = true
                     });
+                
+                Directory.Delete($"{AppDomain.CurrentDomain.BaseDirectory}/Sandbox/{_id}", true);
 
                 GC.SuppressFinalize(this);
             }

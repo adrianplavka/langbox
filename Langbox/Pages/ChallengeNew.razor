@@ -1,5 +1,4 @@
-﻿@using AntDesign
-@using Langbox.Shared.Components
+﻿@using Langbox.Shared.Components
 
 <h2>Add Challenge</h2>
 
@@ -13,7 +12,7 @@
 
         <Input
                Placeholder="Challenge" 
-               @bind-Value="@challengeTitle" 
+               @bind-Value="@ChallengeTitle" 
                Size="@InputSize.Large" />
     </div>
 
@@ -26,12 +25,12 @@
             <Col Span="12">
                 <TextArea Placeholder="Your instructions for this challenge"
                           AutoSize="true"
-                          @bind-Value="@challengeInstructions" />
+                          @bind-Value="@ChallengeInstructions" />
             </Col>
 
             <Col Span="12">
                 <div style="padding-left: 20px; padding-right: 20px;">
-                    <Markdown Content="@challengeInstructions" />
+                    <Markdown Content="@ChallengeInstructions" />
                 </div>
             </Col>
         </Row>
@@ -43,10 +42,10 @@
         </label>
 
         <Select Size="@AntSizeLDSType.Default"
-                DefaultValue="@currentSandboxEnvironment?.TemplateName"
+                DefaultValue="@CurrentSandboxEnvironment?.TemplateName"
                 OnChange=OnTemplateChange
                 Style="width: 200px">
-            @foreach (var sandboxEnvironment in sandboxEnvironments)
+            @foreach (var sandboxEnvironment in SandboxEnvironments)
             {
                 <SelectOption Value="@sandboxEnvironment.TemplateName" Title="@sandboxEnvironment.TemplateName">
                     @sandboxEnvironment.TemplateName

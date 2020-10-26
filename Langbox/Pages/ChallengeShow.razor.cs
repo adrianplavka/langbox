@@ -18,18 +18,19 @@ namespace Langbox.Pages
         [Inject] private ChallengeService ChallengeService { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         
-        private Challenge currentChallenge { get; set; } = new Challenge();
-        private string currentTab = "instructions";
-        private bool isTesting = false;
-        private ExecutionResult? lastExecutionResult;
-        private CancellationTokenSource sandboxExecutionCancellationSource = new CancellationTokenSource();
+        private Challenge CurrentChallenge { get; set; } = new Challenge();
+        private string CurrentTab { get; set; } = "instructions";
+        private bool IsTesting { get; set; } = false;
+        private ExecutionResult? LastExecutionResult { get; set; }
+        private CancellationTokenSource SandboxExecutionCancellationSource { get; set; } 
+            = new CancellationTokenSource();
 
         protected override async Task OnInitializedAsync()
         {
             var challenge = await ChallengeService.GetByIdWithEnvironmentAsync(Id);
 
-            if (challenge is object)
-                currentChallenge = challenge;
+            if (challenge is { })
+                CurrentChallenge = challenge;
             else
                 NavigationManager.NavigateTo("/");
         }
@@ -39,54 +40,54 @@ namespace Langbox.Pages
             if (firstRender)
                 await MainEditor.InitializeAsync(
                     "main-editor",
-                    currentChallenge.Environment.Language,
-                    currentChallenge.MainContent);
+                    CurrentChallenge.Environment.Language,
+                    CurrentChallenge.MainContent);
         }
 
         private async Task OnNextChallenge()
         {
-            var nextChallenge = await ChallengeService.GetRandomWithoutIdAsync(currentChallenge.Id);
+            var nextChallenge = await ChallengeService.GetRandomWithoutIdAsync(CurrentChallenge.Id);
 
-            if (nextChallenge is object && currentChallenge.Id != nextChallenge.Id)
+            if (nextChallenge is { })
             {
                 OnCancelTest();
 
-                currentChallenge = nextChallenge;
-                NavigationManager.NavigateTo($"/challenge/{currentChallenge.Id}");
-                await MainEditor.SetValueAsync(currentChallenge.MainContent);
+                CurrentChallenge = nextChallenge;
+                NavigationManager.NavigateTo($"/challenge/{CurrentChallenge.Id}");
+                await MainEditor.SetValueAsync(CurrentChallenge.MainContent);
             }
         }
 
         private async Task OnTest()
         {
-            if (isTesting)
+            if (IsTesting)
                 return;
 
-            currentTab = "output";
-            isTesting = true;
+            CurrentTab = "output";
+            IsTesting = true;
 
-            lastExecutionResult = await SandboxExecutor.ExecuteChallengeAsync(
-                currentChallenge,
+            LastExecutionResult = await SandboxExecutor.ExecuteChallengeAsync(
+                CurrentChallenge,
                 await MainEditor.GetValueAsync(),
-                sandboxExecutionCancellationSource.Token
+                SandboxExecutionCancellationSource.Token
             );
 
-            currentTab = "output";
-            isTesting = false;
+            CurrentTab = "output";
+            IsTesting = false;
         }
 
         private void OnCancelTest()
         {
-            sandboxExecutionCancellationSource.Cancel();
-            sandboxExecutionCancellationSource.Dispose();
-            sandboxExecutionCancellationSource = new CancellationTokenSource();
-            isTesting = false;
+            SandboxExecutionCancellationSource.Cancel();
+            SandboxExecutionCancellationSource.Dispose();
+            SandboxExecutionCancellationSource = new CancellationTokenSource();
+            IsTesting = false;
         }
 
         public void Dispose()
         {
-            sandboxExecutionCancellationSource.Cancel();
-            sandboxExecutionCancellationSource.Dispose();
+            SandboxExecutionCancellationSource.Cancel();
+            SandboxExecutionCancellationSource.Dispose();
         }
     }
 }
