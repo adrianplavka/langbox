@@ -34,39 +34,38 @@ def run(cmd):
         stderr = subprocess.PIPE,
     )
     stdout, stderr = proc.communicate()
- 
+
     return proc.returncode, stdout, stderr
 
 @timeout(10)
 def main():
-    # Run "dotnet build" to check, whether the project succeeds
+    # Run "gradlew build" to check, whether the project succeeds
     # to build itself.
-    # 
-    # If it doesn't, the code will prematurely return information 
+    #
+    # If it doesn't, the code will prematurely return information
     # about the unsuccessful build.
     code, out, err = run([
-        "dotnet", "build",
-        "--nologo"
+        "./gradlew", "build",
+        "-x", "test",
+        "--warning-mode=none"
     ])
 
     if code != 0:
-        # String manipulation to remove unnecessary information about 
+        # String manipulation to remove unnecessary information about
         # the build failure & only provide necessary parts about it.
-        out = out.split("Build FAILED.")[0].split("\n")[2:]
-        out = '\n'.join(out).strip()
+
+        # out = out.split("Build FAILED.")[0].split("\n")[2:]
+        # out = '\n'.join(out).strip()
         print json.dumps({'Type': 'build-failed', 'Stdout': out, 'Stderr': err})
         sys.exit(1)
 
-    # Run "dotnet test" to check for test runs.
+    # Run "gradlew test" to check for test runs.
     #
-    # This also outputs the contents of a test run into a file,  
+    # This also outputs the contents of a test run into a file,
     # which will be later used to parse the results of a test.
     code, out, err = run([
-        "dotnet", "test", 
-        "--logger", "trx;logfilename=testResult.trx", 
-        "--results-directory", ".", 
-        "--verbosity", "quiet", 
-        "--nologo"
+        "./gradlew", "test",
+        "--warning-mode=none"
     ])
 
     if code != 0:

@@ -16,15 +16,12 @@ namespace Langbox
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment Env;
+        private readonly IWebHostEnvironment _env;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
-            Configuration = configuration;
-            Env = env;
+            _env = env;
         }
-
-        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -32,14 +29,14 @@ namespace Langbox
         {
             services.AddAntDesign();
 
-            if (Env.IsDevelopment())
+            if (_env.IsDevelopment())
                 services.AddLiveReload(config => {
                     config.LiveReloadEnabled = true;
                     config.ClientFileExtensions = ".css,.js,.htm,.html";
                     config.FolderToMonitor = "~/../";
                 });
 
-            if (Env.IsDevelopment())
+            if (_env.IsDevelopment())
                 services.AddRazorPages().AddRazorRuntimeCompilation();
             else
                 services.AddRazorPages();
@@ -58,7 +55,7 @@ namespace Langbox
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            if (Env.IsDevelopment())
+            if (_env.IsDevelopment())
             {
                 app.UseLiveReload();
                 app.UseDeveloperExceptionPage();
@@ -138,6 +135,32 @@ namespace Langbox
                 DockerTestPath = "/app/Lgbox-CSharp-MSUnit-Tests/Test.cs"
             });
 
+            context.Add(new SandboxEnvironment
+            {
+                TemplateName = "Java (JUnit)",
+                Language = "java",
+                MainFileName = "Main.java",
+                TestFileName = "Test.java",
+                MainBoilerplate = 
+@"public class Main {
+
+}",
+                TestBoilerplate = 
+@"import org.junit.Assert;
+
+public class Test {
+
+    @org.junit.Test
+    public void exampleTest() {
+        Assert.assertTrue(""Should be true"", 1 == 1);
+    }
+}",
+                DockerImage = "lgbox/java-junit-template:0.1.0",
+                DockerCommand = "python main.py",
+                DockerMainPath = "/app/src/main/java/Main.java",
+                DockerTestPath = "/app/src/test/java/Test.java"
+            });
+
             // Seed the database with challenges.
             context.Add(new Challenge
             {
@@ -190,6 +213,41 @@ namespace ExampleTests
                 SandboxEnvironmentId = "C# (MSUnit)"
             });
 
+            context.Add(new Challenge
+            {
+                Title = "Three & Four",
+                Instructions =
+@"Your task is to fulfill class method implementations, according to the return types.
+
+Example:
+
+- Method `three` should return `3`.
+
+- Method `four` should return `""4""`.",
+                MainContent = 
+@"public class Main {
+    public static int three() {
+        return 0;
+    }
+    
+    public static String four() {
+        return ""0"";
+    }
+}",
+                TestContent = 
+@"import org.junit.Assert;
+
+public class Test {
+
+    @org.junit.Test
+    public void shouldReturnCorrectValues() {
+        Assert.assertTrue(Main.three() == 3);
+        Assert.assertTrue(Main.four() == ""4"");
+    }
+}",
+                SandboxEnvironmentId = "Java (JUnit)"
+            });
+            
             context.SaveChanges();
         }
     }

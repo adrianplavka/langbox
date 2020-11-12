@@ -24,6 +24,10 @@ Sandbox templates are Docker images and they are located in the project root und
 
 Navigate to the `SandboxTemplates/Lgbox-CSharp-MSUnit` directory & run command `docker build -t lgbox/csharp-msunit-template:0.1.0 .` - after this step, this template will be available to the application.
 
+#### Java (JUnit) template
+
+Navigate to the `SandboxTemplates/Lgbox-Java-JUnit` directory & run command `docker build -t lgbox/java-junit-template:0.1.0 .` - after this step, this template will be available to the application.
+
 ### Building & running using Visual Studio
 
 #### Requirements

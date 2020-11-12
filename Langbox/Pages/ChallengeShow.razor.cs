@@ -46,15 +46,19 @@ namespace Langbox.Pages
 
         private async Task OnNextChallenge()
         {
-            var nextChallenge = await ChallengeService.GetRandomWithoutIdAsync(CurrentChallenge.Id);
+            var nextChallenge = await ChallengeService.GetRandomWithoutIdWithEnvironmentAsync(CurrentChallenge.Id);
 
             if (nextChallenge is { })
             {
                 OnCancelTest();
 
                 CurrentChallenge = nextChallenge;
+                LastExecutionResult = null;
+                CurrentTab = "instructions";
                 NavigationManager.NavigateTo($"/challenge/{CurrentChallenge.Id}");
+                
                 await MainEditor.SetValueAsync(CurrentChallenge.MainContent);
+                await MainEditor.SetLanguageAsync(CurrentChallenge.Environment.Language);
             }
         }
 

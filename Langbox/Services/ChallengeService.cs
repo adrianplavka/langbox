@@ -40,7 +40,7 @@ namespace Langbox.Services
             return challenges.Count == 0 ? null : challenges[0];
         }
 
-        public async Task<Challenge?> GetRandomWithoutIdAsync(int id)
+        public async Task<Challenge?> GetRandomWithoutIdWithEnvironmentAsync(int id)
         {
             var challenges = await _dbContext.Challenges
                 .FromSqlRaw(
@@ -49,6 +49,7 @@ namespace Langbox.Services
                     "ORDER BY random() " +
                     "LIMIT 1"
                 )
+                .Include(c => c.Environment)
                 .ToListAsync();
 
             return challenges.Count == 0 ? null : challenges[0];

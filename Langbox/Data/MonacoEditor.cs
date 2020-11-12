@@ -9,13 +9,13 @@ namespace Langbox.Data
      */
     public class MonacoEditor
     {
-        private readonly IJSRuntime JS;
+        private readonly IJSRuntime _js;
 
         private string? _moduleUri;
 
         public MonacoEditor(IJSRuntime js)
         {
-            JS = js;
+            _js = js;
         }
 
         /**
@@ -26,7 +26,7 @@ namespace Langbox.Data
          */
         public async Task InitializeAsync(string domId, string language)
         {
-            _moduleUri = await JS.InvokeAsync<string>("Monaco.initialize", domId, language);
+            _moduleUri = await _js.InvokeAsync<string>("Monaco.initialize", domId, language);
         }
 
         /**
@@ -49,13 +49,10 @@ namespace Langbox.Data
          */
         public async Task<string> GetValueAsync()
         {
-            if (!(_moduleUri is null))
-            {
-                return await JS.InvokeAsync<string>("Monaco.getValueOfModel", _moduleUri);
-            } else
-            {
+            if (_moduleUri is null)
                 return "";
-            }
+            
+            return await _js.InvokeAsync<string>("Monaco.getValueOfModel", _moduleUri);
         }
 
         /**
@@ -65,10 +62,8 @@ namespace Langbox.Data
          */
         public async Task SetValueAsync(string value)
         {
-            if (!(_moduleUri is null))
-            {
-                await JS.InvokeVoidAsync("Monaco.setValueOfModel", _moduleUri, value);
-            }
+            if (_moduleUri is { })
+                await _js.InvokeVoidAsync("Monaco.setValueOfModel", _moduleUri, value);
         }
 
         /**
@@ -78,10 +73,8 @@ namespace Langbox.Data
         */
         public async Task SetLanguageAsync(string language)
         {
-            if (!(_moduleUri is null))
-            {
-                await JS.InvokeVoidAsync("Monaco.setLangOfModel", _moduleUri, language);
-            }
+            if (_moduleUri is { })
+                await _js.InvokeVoidAsync("Monaco.setLangOfModel", _moduleUri, language);
         }
     }
 }

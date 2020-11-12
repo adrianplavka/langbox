@@ -41,10 +41,7 @@ const Monaco = {
      * @param {string} lang
      */
     setLangOfModel: (uri, lang) =>
-        monaco.editor.getModel(uri).updateOptions({
-            language: lang,
-            theme: 'vs-dark'
-        }),
+        monaco.editor.setModelLanguage(monaco.editor.getModel(uri), lang)
 };
 
 window.Monaco = Monaco;
